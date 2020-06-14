@@ -6,9 +6,24 @@ const authenticate = require("../authenticate");
 
 /* GET users listing. Allows admin users to retrieve a list of all registered users  */
 
-router.get("/", function (req, res, next) {
+router.get(
+  "/",
+  authenticate.verifyUser,
+  authenticate.verifyAdmin,
+  (req, res, next) => {
+    User.find()
+      .then((users) => {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.json(users);
+      })
+      .catch((err) => next(err));
+  }
+);
+
+/*router.get("/", function (req, res, next) {
   res.send("respond with a resource");
-});
+});*/
 
 /* Allows a new user to register on website */
 router.post("/signup", (req, res) => {
@@ -27,23 +42,23 @@ router.post("/signup", (req, res) => {
         if (req.body.lastname) {
           user.lastname = req.body.lastname;
         }
-        user.save(err => {
+        user.save((err) => {
           if (err) {
             res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
+            res.setHeader("Content-Type", "application/json");
             res.json({ err: err });
             return;
           }
-        passport.authenticate("local")(req, res, () => {
-          res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json");
-          res.json({ success: true, status: "Registration Successful!" });
-        });
+          passport.authenticate("local")(req, res, () => {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            res.json({ success: true, status: "Registration Successful!" });
+          });
         });
       }
-    });
+    }
+  );
 });
-
 
 router.post("/login", passport.authenticate("local"), (req, res) => {
   const token = authenticate.getToken({ _id: req.user._id });
@@ -67,5 +82,7 @@ router.get("/logout", (req, res, next) => {
     return next(err);
   }
 });
+
+router.user;
 
 module.exports = router;
