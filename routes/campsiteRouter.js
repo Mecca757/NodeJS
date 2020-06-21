@@ -36,8 +36,7 @@ campsiteRouter
   .put(
     cors.corsWithOptions,
     authenticate.verifyUser,
-    authenticate.verifyAdmin,
-    (req, res, next) => {
+       (req, res, next) => {
       res.statusCode = 403;
       res.end("PUT operation not supported on /campsites");
     }
